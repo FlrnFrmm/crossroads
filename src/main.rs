@@ -3,19 +3,15 @@ mod configuration;
 mod gateway;
 
 use anyhow::Result;
-use tokio::select;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let configuration = configuration::Configuration::default();
     let gateway = gateway::Gateway::new(&configuration);
     let api = api::API::new(&configuration);
-    select! {
-        gateway_result = gateway.run() => {
-            gateway_result
-        }
-        api_result = api.run() => {
-            api_result
-        }
-    }
+    let mut set = tokio::task::JoinSet::new();
+    set.spawn(async move { gateway.run().await });
+    set.spawn(async move { api.run().await });
+    set.join_all().await;
+    Ok(())
 }
