@@ -3,16 +3,30 @@ use std::collections::HashMap;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::{TcpListener, TcpStream};
 
-pub async fn run() -> Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:80").await?;
+use crate::configuration::Configuration;
 
-    loop {
-        match listener.accept().await {
-            Ok((stream, _address)) => {
-                tokio::spawn(handle_connection(stream));
-            }
-            Err(err) => {
-                return Err(anyhow!("Error accepting connection: {}", err.to_string()));
+pub struct Gateway {
+    port: u16,
+}
+
+impl Gateway {
+    pub fn new(configuration: &Configuration) -> Self {
+        Self {
+            port: configuration.gateway.port,
+        }
+    }
+
+    pub async fn run(&self) -> Result<()> {
+        let address = format!("0.0.0.0:{}", self.port);
+        let listener = TcpListener::bind(address).await?;
+        loop {
+            match listener.accept().await {
+                Ok((stream, _address)) => {
+                    tokio::spawn(handle_connection(stream));
+                }
+                Err(err) => {
+                    return Err(anyhow!("Error accepting connection: {}", err.to_string()));
+                }
             }
         }
     }
