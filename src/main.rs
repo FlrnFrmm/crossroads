@@ -1,4 +1,5 @@
 mod api;
+mod cli;
 mod configuration;
 mod gateway;
 
@@ -6,7 +7,7 @@ use anyhow::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let configuration = configuration::Configuration::default();
+    let configuration = cli::evaluate()?;
     let gateway = gateway::Gateway::new(&configuration);
     let api = api::API::new(&configuration);
     let mut set = tokio::task::JoinSet::new();
