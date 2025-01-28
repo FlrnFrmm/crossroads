@@ -1,5 +1,9 @@
+mod endpoints;
+mod errors;
+
 use anyhow::Result;
-use axum::{routing::get, Router};
+use axum::routing::{delete, get, post, put};
+use axum::Router;
 
 use crate::configuration::Configuration;
 
@@ -15,13 +19,16 @@ impl API {
     }
 
     pub async fn run(&self) -> Result<()> {
-        let app = Router::new().route("/", get(root));
+        let roads = endpoints::Roads::default();
+        let app = Router::new()
+            .route("/roads", post(endpoints::create_road))
+            .route("/roads", get(endpoints::all_roads))
+            .route("/roads/{host}", get(endpoints::get_road))
+            .route("/roads/{host}", put(endpoints::update_road))
+            .route("/roads/{host}", delete(endpoints::delete_road))
+            .with_state(roads);
         let address = format!("0.0.0.0:{}", self.port);
         let listener = tokio::net::TcpListener::bind(address).await?;
         axum::serve(listener, app).await.map_err(|err| err.into())
     }
-}
-
-async fn root() -> &'static str {
-    "Hello from the api!"
 }
