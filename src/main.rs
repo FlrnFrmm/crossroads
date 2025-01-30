@@ -8,7 +8,6 @@ use anyhow::Result;
 #[tokio::main]
 async fn main() -> Result<()> {
     let configuration = cli::evaluate()?;
-    println!("{:?}", configuration);
     let gateway = gateway::Gateway::new(&configuration);
     let api = api::API::new(&configuration);
     let mut set = tokio::task::JoinSet::new();
