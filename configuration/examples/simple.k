@@ -1,2 +1,2 @@
-api.port = 8153
+api.port = 8150
 gateway.port = 8080
