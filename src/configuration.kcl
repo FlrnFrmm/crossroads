@@ -1,4 +1,0 @@
-Configuration = Configuration {
-  api.port = 8155
-  gateway.port = 8286
-}
