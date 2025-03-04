@@ -38,6 +38,12 @@ impl Configuration {
         };
         let api = API::default();
         let exec_result = api.exec_program(args)?;
+        if !exec_result.err_message.is_empty() {
+            return Err(anyhow!(
+                "Configuration error:\n\n{}",
+                exec_result.err_message
+            ));
+        }
         serde_json::from_str(&exec_result.json_result).map_err(|err| anyhow!(err))
     }
 }
