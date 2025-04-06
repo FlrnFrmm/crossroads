@@ -1,3 +1,7 @@
 Cargo.lock
-
+.env
 target
+.cicd/dagger/dagger.gen.go
+.cicd/dagger/internal/dagger
+.cicd/dagger/internal/querybuilder
+.cicd/dagger/internal/telemetry
