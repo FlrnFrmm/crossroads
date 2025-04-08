@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches: ["ci/workflows"]
+  pull_request:
+    branches: ["ci/workflows"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build with ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Ubuntu
+        run: |
+          rustup target add x86_64-unknown-linux-gnu
+          cargo build --verbose --target x86_64-unknown-linux-gnu
+      - name: Build Windows
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+          cargo build --verbose --target x86_64-pc-windows-gnu
+      - name: Build MacOS
+        run: |
+          rustup target add aarch64-apple-darwin
+          cargo build --verbose --target aarch64-apple-darwin
+      - name: Run Tests
+        run: cargo test --verbose
