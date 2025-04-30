@@ -9,7 +9,7 @@ pub fn evaluate() -> Result<Configuration> {
     if let Some(path) = cli.configuration.as_deref() {
         return Configuration::from_configuration_file(path);
     }
-    Configuration::default()
+    Ok(Configuration::default())
 }
 
 #[derive(Parser)]
