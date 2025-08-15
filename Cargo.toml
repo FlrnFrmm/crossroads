@@ -1,9 +1,8 @@
-[package]
-name = "crossroads"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = [".", "crates/api", "crates/gateway"]
+resolver = "2"
 
-[dependencies]
+[workspace.dependencies]
 anyhow = "1.0.99"
 axum = "0.8.4"
 bytes = "1.10.1"
@@ -14,3 +13,21 @@ serde = { version = "1.0.219", features = ["derive"] }
 serde_yaml = "0.9.34"
 serde_json = "1.0.142"
 rama = { version = "0.2.0", features = ["http-full"] }
+
+[package]
+name = "crossroads"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+bytes.workspace = true
+clap.workspace = true
+tokio.workspace = true
+garde.workspace = true
+serde.workspace = true
+serde_yaml.workspace = true
+serde_json.workspace = true
+api = { path = "crates/api" }
+gateway = { path = "crates/gateway" }

@@ -1,11 +1,12 @@
+pub mod configuration;
 mod endpoints;
 mod errors;
 
 use anyhow::Result;
-use axum::routing::{delete, get, post, put};
 use axum::Router;
+use axum::routing::{delete, get, post, put};
 
-use crate::configuration::Configuration;
+use configuration::Configuration;
 
 pub struct API {
     port: u16,
@@ -14,7 +15,7 @@ pub struct API {
 impl API {
     pub fn new(configuration: &Configuration) -> Self {
         Self {
-            port: configuration.api.port,
+            port: configuration.port,
         }
     }
 

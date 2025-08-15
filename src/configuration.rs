@@ -1,19 +1,15 @@
-mod api;
-mod gateway;
-mod validation;
-
 use anyhow::Result;
 use garde::Validate;
 use std::path::Path;
 
-#[derive(Debug, serde::Deserialize, garde::Validate)]
+#[derive(Debug, serde::Deserialize, garde::Validate, Default)]
 pub struct Configuration {
     #[garde(dive)]
     #[serde(default)]
-    pub api: api::Configuration,
+    pub api: api::configuration::Configuration,
     #[garde(dive)]
     #[serde(default)]
-    pub gateway: gateway::Configuration,
+    pub gateway: gateway::configuration::Configuration,
 }
 
 impl Configuration {
@@ -22,14 +18,5 @@ impl Configuration {
         let configuration: Configuration = serde_yaml::from_str(&content)?;
         configuration.validate()?;
         Ok(configuration)
-    }
-}
-
-impl Default for Configuration {
-    fn default() -> Self {
-        Self {
-            api: api::Configuration::default(),
-            gateway: gateway::Configuration::default(),
-        }
     }
 }
