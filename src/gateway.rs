@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
-use rama::http::response::Json;
 use rama::http::server::HttpServer;
+use rama::http::service::web::extract::Json;
 use rama::http::Request;
 use rama::net::address::SocketAddress;
 use rama::rt::Executor;
