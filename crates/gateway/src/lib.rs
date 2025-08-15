@@ -1,14 +1,16 @@
-use anyhow::{anyhow, Result};
+pub mod configuration;
+
+use anyhow::{Result, anyhow};
+use rama::http::Request;
 use rama::http::server::HttpServer;
 use rama::http::service::web::extract::Json;
-use rama::http::Request;
 use rama::net::address::SocketAddress;
 use rama::rt::Executor;
 use rama::service::service_fn;
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr};
 
-use crate::configuration::Configuration;
+use configuration::Configuration;
 
 pub struct Gateway {
     port: u16,
@@ -17,7 +19,7 @@ pub struct Gateway {
 impl Gateway {
     pub fn new(configuration: &Configuration) -> Self {
         Self {
-            port: configuration.gateway.port,
+            port: configuration.port,
         }
     }
 
