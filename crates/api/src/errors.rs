@@ -3,9 +3,9 @@ use axum::{http::StatusCode, Json};
 #[derive(Debug)]
 pub(super) enum ApiError {
     InvalidIp(String),
-    DuplicateOrigin(String),
+    HostAlreadyExists,
     NotFound,
-    DatabaseError(DatabaseError),
+    DatabaseError(crate::database::errors::DatabaseError),
 }
 
 impl From<ApiError> for (StatusCode, Json<serde_json::Value>) {
@@ -15,9 +15,9 @@ impl From<ApiError> for (StatusCode, Json<serde_json::Value>) {
                 StatusCode::BAD_REQUEST,
                 format!("Invalid IPv4 address: {}", ip),
             ),
-            ApiError::DuplicateOrigin(origin) => (
+            ApiError::HostAlreadyExists => (
                 StatusCode::CONFLICT,
-                format!("Origin already exists: {}", origin),
+                format!("Host already exists, use update instead"),
             ),
             ApiError::NotFound => (StatusCode::NOT_FOUND, "Road not found".to_string()),
             ApiError::DatabaseError(db_err) => {
@@ -26,18 +26,5 @@ impl From<ApiError> for (StatusCode, Json<serde_json::Value>) {
         };
 
         (status, Json(serde_json::json!({ "error": message })))
-    }
-}
-#[derive(Debug)]
-pub(super) enum DatabaseError {
-    UnableToCreateRoad,
-}
-
-impl ToString for DatabaseError {
-    fn to_string(&self) -> String {
-        match self {
-            DatabaseError::UnableToCreateRoad => "could not create road",
-        }
-        .into()
     }
 }

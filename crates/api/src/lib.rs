@@ -29,13 +29,13 @@ impl API {
         Ok(api)
     }
 
-    pub async fn run(&self) -> Result<()> {
+    pub async fn run(self) -> Result<()> {
         let app = Router::new()
-            // .route("/roads/{host}", post(endpoints::create_road))
             .route("/roads", get(endpoints::all_roads))
-            // .route("/roads/{host}", get(endpoints::get_road))
-            // .route("/roads/{host}", put(endpoints::update_road))
-            // .route("/roads/{host}", delete(endpoints::delete_road))
+            .route("/roads/{host}", post(endpoints::create_road))
+            .route("/roads/{host}", get(endpoints::get_road))
+            .route("/roads/{host}", put(endpoints::update_road))
+            .route("/roads/{host}", delete(endpoints::delete_road))
             .with_state(Arc::new(RwLock::new(self.database)));
         let address = format!("0.0.0.0:{}", self.port);
         let listener = tokio::net::TcpListener::bind(address).await?;

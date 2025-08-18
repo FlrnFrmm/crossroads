@@ -1,3 +1,5 @@
+pub mod errors;
+
 use anyhow::{anyhow, Context, Result};
 use libsql::{params, params::IntoParams, Builder, Rows};
 
@@ -51,12 +53,12 @@ impl Database {
         Ok(result)
     }
 
-    pub async fn add_road(&self, Road { host, component }: Road) -> Result<Option<Road>> {
+    pub async fn create_road(&self, Road { host, component }: Road) -> Result<Option<Road>> {
         if self.road_exists(&host).await?.is_some() {
             return Ok(None);
         }
         let statement = "INSERT INTO roads (host, component) VALUES (?, ?) RETURNING *";
-        let mut rows = self.query(statement, params![component, host]).await?;
+        let mut rows = self.query(statement, params![host, component]).await?;
         Self::maybe_road(&mut rows).await
     }
 
@@ -66,13 +68,10 @@ impl Database {
         Self::maybe_road(&mut rows).await
     }
 
-    pub async fn delete_road(&self, host: String) -> Result<u64> {
-        let connection = self.handle.connect()?;
-        let statement = "DELETE FROM roads WHERE host = ?;";
-        connection
-            .execute(statement, params![host])
-            .await
-            .context("Failed to delete road into database")
+    pub async fn delete_road(&self, host: String) -> Result<Option<Road>> {
+        let statement = "DELETE FROM roads WHERE host = ? RETURNING *;";
+        let mut rows = self.query(statement, params![host]).await?;
+        Self::maybe_road(&mut rows).await
     }
 
     pub async fn road_exists(&self, host: &str) -> Result<Option<Road>> {
