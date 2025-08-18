@@ -1,3 +1,5 @@
+pub mod event;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

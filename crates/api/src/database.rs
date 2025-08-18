@@ -1,6 +1,6 @@
 pub mod errors;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use libsql::{params, params::IntoParams, Builder, Rows};
 
 use crate::{configuration::database::Configuration, road::Road};

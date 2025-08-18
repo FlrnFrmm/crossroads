@@ -4,15 +4,17 @@ use axum::http::StatusCode;
 use axum::response::Json;
 use bytes::Bytes;
 use std::sync::Arc;
+use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 
 use crate::database::errors::DatabaseError;
 use crate::database::Database;
 use crate::errors::ApiError;
+use crate::road::event::Event as RoadEvent;
 use crate::road::Road;
 
 pub(super) async fn all_roads(
-    State(db): State<Arc<RwLock<Database>>>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
 ) -> Result<Json<Vec<Road>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
     let roads = db
@@ -23,10 +25,10 @@ pub(super) async fn all_roads(
 }
 
 pub(super) async fn create_road(
-    State(db): State<Arc<RwLock<Database>>>,
+    State((db, sender)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
     Path(host): Path<String>,
     body: Bytes,
-) -> Result<Json<Road>, (StatusCode, Json<serde_json::Value>)> {
+) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
     let component = body.to_vec();
     let Some(road) = db
@@ -36,11 +38,15 @@ pub(super) async fn create_road(
     else {
         return Err(ApiError::HostAlreadyExists.into());
     };
-    Ok(Json(road))
+    sender
+        .send(RoadEvent::Create(road))
+        .await
+        .map_err(|_| ApiError::FailedToSendEvent)?;
+    Ok(StatusCode::CREATED)
 }
 
 pub(super) async fn get_road(
-    State(db): State<Arc<RwLock<Database>>>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
     Path(host): Path<String>,
 ) -> Result<Json<Option<Road>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
@@ -52,7 +58,7 @@ pub(super) async fn get_road(
 }
 
 pub(super) async fn update_road(
-    State(db): State<Arc<RwLock<Database>>>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
     Path(host): Path<String>,
     body: Bytes,
 ) -> Result<Json<Option<Road>>, (StatusCode, Json<serde_json::Value>)> {
@@ -66,7 +72,7 @@ pub(super) async fn update_road(
 }
 
 pub(super) async fn delete_road(
-    State(db): State<Arc<RwLock<Database>>>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
     Path(host): Path<String>,
 ) -> Result<Json<Option<Road>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
