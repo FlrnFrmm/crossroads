@@ -1,4 +1,4 @@
-pub mod errors;
+pub(crate) mod error;
 
 use anyhow::{anyhow, Result};
 use libsql::{params, params::IntoParams, Builder, Rows};

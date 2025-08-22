@@ -1,7 +1,7 @@
 pub mod configuration;
 pub mod database;
 mod endpoints;
-mod errors;
+mod error;
 pub mod road;
 
 use std::sync::Arc;
