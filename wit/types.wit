@@ -1,0 +1,10 @@
+package wit:crossroads@0.1.0;
+
+interface types {
+    resource request {
+        headers: func() -> result<list<tuple<string, string>>, string>;
+        set-header: func(key: string, value: string) -> result<_, string>;
+        uri: func() -> result<string, string>;
+        set-uri: func(uri: string) -> result<_, string>;
+    }
+}
