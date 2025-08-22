@@ -1,0 +1,10 @@
+package wit:crossroads@0.1.0;
+
+interface router {
+    use types.{request};
+    handle: func(request: request) -> result<_, string>;
+}
+
+world crossroads {
+    export router;
+}
