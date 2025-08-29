@@ -5,82 +5,143 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::Json;
 use std::sync::Arc;
-use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
+use tokio::sync::mpsc::UnboundedSender;
 
-use crate::database::error::Error as DbErr;
 use crate::database::Database;
+use crate::database::error::Error as DbErr;
 use crate::error::Error as ApiErr;
-use crate::road::event::Event as RoadEvent;
-use crate::road::Road;
 use loader::Loader;
+use runtime::Message;
+use runtime::proxy::ProxyMetadata;
 
-pub(super) async fn all_roads(
-    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
-) -> Result<Json<Vec<Road>>, (StatusCode, Json<serde_json::Value>)> {
+pub(super) async fn current_proxy(
+    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+) -> Result<Json<Option<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
-    let roads = db
-        .all_roads()
+    let proxy = db
+        .get_current_proxy()
         .await
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
-    Ok(Json(roads))
+    Ok(Json(proxy))
 }
 
-pub(super) async fn create_road(
-    State((db, sender)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
-    Path(host): Path<String>,
+pub(super) async fn set_current_proxy(
+    State((db, sender)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    Path(tag): Path<String>,
+) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
+    let db = db.write().await;
+    let maybe_proxy_metadata = db
+        .set_current_proxy(&tag)
+        .await
+        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+    let Some(proxy) = maybe_proxy_metadata else {
+        return Ok(StatusCode::NOT_FOUND);
+    };
+    let message = Message::SetComponent(proxy);
+    sender
+        .send(message)
+        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+    Ok(StatusCode::OK)
+}
+
+pub(super) async fn all_proxys(
+    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+) -> Result<Json<Vec<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
+    let db = db.read().await;
+    let proxys = db
+        .all_proxys()
+        .await
+        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+    Ok(Json(proxys))
+}
+
+pub(super) async fn create_proxy(
+    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    Path(tag): Path<String>,
     Json(loader): Json<Loader>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
     let component = loader.load().map_err(|e| ApiErr::FailedToLoad(e))?;
-    let Some(road) = db
-        .create_road(Road { host, component })
+    let Some(_host) = db
+        .create_proxy(tag, component.clone())
         .await
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToCreateRoad))?
     else {
-        return Err(ApiErr::HostAlreadyExists.into());
+        return Err(ApiErr::TagAlreadyExists.into());
     };
-    sender
-        .send(RoadEvent::Create(road))
-        .await
-        .map_err(|_| ApiErr::FailedToSendEvent)?;
     Ok(StatusCode::CREATED)
 }
 
-pub(super) async fn get_road(
-    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
-    Path(host): Path<String>,
-) -> Result<Json<Option<Road>>, (StatusCode, Json<serde_json::Value>)> {
+pub(super) async fn get_proxy(
+    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    Path(tag): Path<String>,
+) -> Result<Json<Option<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
-    let road = db
-        .road_exists(&host)
+    let proxy_metadata = db
+        .proxy_exists(&tag)
         .await
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
-    Ok(Json(road))
+    Ok(Json(proxy_metadata))
 }
 
-pub(super) async fn update_road(
-    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
-    Path(host): Path<String>,
+pub(super) async fn update_proxy(
+    State((db, sender)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    Path(tag): Path<String>,
     Json(loader): Json<Loader>,
-) -> Result<Json<Option<Road>>, (StatusCode, Json<serde_json::Value>)> {
+) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
     let component = loader.load().map_err(|e| ApiErr::FailedToLoad(e))?;
-    let updated_road = db
-        .update_road(Road { host, component })
+    let Some(proxy_metadata) = db
+        .update_proxy(tag, component.clone())
         .await
-        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
-    Ok(Json(updated_road))
+        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToUpdateRoad))?
+    else {
+        return Ok(StatusCode::NOT_FOUND);
+    };
+    let current_proxy_metadata = db
+        .get_current_proxy()
+        .await
+        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?
+        .ok_or(ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+    if current_proxy_metadata.tag == proxy_metadata.tag {
+        let current_proxy = db
+            .get_proxy(&current_proxy_metadata.tag)
+            .await
+            .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?
+            .ok_or(ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+        sender
+            .send(Message::SetComponent(current_proxy))
+            .map_err(|_| ApiErr::FailedToSendMessage)?;
+    }
+    Ok(StatusCode::OK)
 }
 
-pub(super) async fn delete_road(
-    State((db, _)): State<(Arc<RwLock<Database>>, Sender<RoadEvent>)>,
+pub(super) async fn delete_proxy(
+    State((db, sender)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
     Path(host): Path<String>,
-) -> Result<Json<Option<Road>>, (StatusCode, Json<serde_json::Value>)> {
+) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
-    let deleted_road = db
-        .delete_road(host)
+    if let Some(proxy_metadata) = db
+        .delete_proxy(host)
         .await
-        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToDeleteRoad))?;
-    Ok(Json(deleted_road))
+        .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToDeleteRoad))?
+    {
+        let current_proxy_metadata = db
+            .get_current_proxy()
+            .await
+            .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?
+            .ok_or(ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+        if current_proxy_metadata.tag == proxy_metadata.tag {
+            let current_proxy = db
+                .get_proxy(&current_proxy_metadata.tag)
+                .await
+                .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?
+                .ok_or(ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
+            sender
+                .send(Message::SetComponent(current_proxy))
+                .map_err(|_| ApiErr::FailedToSendMessage)?;
+        }
+    }
+    Ok(StatusCode::OK)
 }

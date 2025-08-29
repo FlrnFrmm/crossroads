@@ -1,44 +1,33 @@
 pub mod configuration;
+mod proxy;
 
-use anyhow::{Result, anyhow};
-use rama::http::Request;
-use rama::http::server::HttpServer;
-use rama::http::service::web::extract::Json;
-use rama::net::address::SocketAddress;
-use rama::rt::Executor;
-use rama::service::service_fn;
-use std::convert::Infallible;
-use std::net::{IpAddr, Ipv4Addr};
+use anyhow::{Error, Result};
+use rama::{http::server::HttpServer, rt::Executor};
+use tokio::sync::mpsc::UnboundedSender;
 
 use configuration::Configuration;
+
+use runtime::Message;
 
 pub struct Gateway {
     port: u16,
 }
 
 impl Gateway {
-    pub fn new(configuration: &Configuration) -> Self {
-        Self {
+    pub fn new(configuration: &Configuration) -> Result<Self> {
+        let gateway = Self {
             port: configuration.port,
-        }
+        };
+        Ok(gateway)
     }
 
-    pub async fn run(&self) -> Result<()> {
-        let ip = IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0));
-        let address = SocketAddress::new(ip, self.port);
-        let service = service_fn(handle);
-        HttpServer::auto(Executor::default())
-            .listen(address, service)
+    pub async fn run(&self, sender: UnboundedSender<Message>) -> Result<()> {
+        let executor = Executor::default();
+        let address = ([0, 0, 0, 0], self.port);
+        let proxy = proxy::WebAssemblyComponentProxy::new(sender);
+        HttpServer::auto(executor)
+            .listen(address, proxy)
             .await
-            .map_err(|error| anyhow!("{}", error.to_string()))
+            .map_err(|e| Error::from_boxed(e))
     }
-}
-
-async fn handle(request: Request) -> Result<Json<serde_json::Value>, Infallible> {
-    let data = serde_json::json!({
-        "method": request.method().as_str(),
-        "path": request.uri().path(),
-    });
-    let response = Json(data);
-    Ok(response)
 }
