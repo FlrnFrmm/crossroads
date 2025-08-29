@@ -1,13 +1,11 @@
-use anyhow::{anyhow, Result};
-use std::path::PathBuf;
+use anyhow::Result;
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub enum Loader {
-    Path(PathBuf),
     Payload(Vec<u8>),
-    Registry(RegistryCredentials),
+    Registry(RegistryCredentials), // Todo
 }
 
 #[derive(Serialize, Deserialize)]
@@ -26,9 +24,6 @@ pub struct Login {
 impl Loader {
     pub fn load(self) -> Result<Vec<u8>> {
         match self {
-            Loader::Path(path) => {
-                std::fs::read(path).map_err(|e| anyhow!("Couldn't load file: {}", e))
-            }
             Loader::Payload(bytes) => Ok(bytes),
             Loader::Registry(_registry_credentials) => todo!(),
         }

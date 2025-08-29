@@ -1,7 +1,8 @@
 use anyhow::{Result, anyhow};
-use rama::http::{HeaderName, HeaderValue, Uri};
+use rama::http::Request as RamaRequest;
 use std::collections::HashMap;
-use wasmtime::component::{Resource, ResourceTable, TypedFunc, bindgen};
+use std::str::FromStr;
+use wasmtime::component::{Resource, ResourceTable};
 use wasmtime_wasi::{WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView};
 
 use crate::Request;
@@ -10,7 +11,7 @@ use crate::bindings::{Host, HostRequest};
 pub struct Context {
     pub wasi: WasiCtx,
     pub table: ResourceTable,
-    pub requests: HashMap<u32, rama::http::Request>,
+    pub requests: HashMap<u32, RamaRequest>,
 }
 
 impl WasiView for Context {
@@ -19,6 +20,24 @@ impl WasiView for Context {
             ctx: &mut self.wasi,
             table: &mut self.table,
         }
+    }
+}
+
+impl Context {
+    fn retrieve_request(&self, session_id: u32) -> Result<&RamaRequest, String> {
+        let request = self
+            .requests
+            .get(&session_id)
+            .ok_or_else(|| "Request not in resource table".to_string())?;
+        Ok(request)
+    }
+
+    fn retrieve_request_mut(&mut self, session_id: u32) -> Result<&mut RamaRequest, String> {
+        let request = self
+            .requests
+            .get_mut(&session_id)
+            .ok_or_else(|| "Request not in resource table".to_string())?;
+        Ok(request)
     }
 }
 
@@ -36,10 +55,7 @@ impl Host for Context {}
 
 impl HostRequest for Context {
     fn headers(&mut self, self_: Resource<Request>) -> Result<Vec<(String, String)>, String> {
-        let request = self
-            .requests
-            .get(&self_.rep())
-            .ok_or_else(|| "Request not in resource table".to_string())?;
+        let request = self.retrieve_request(self_.rep())?;
         let header = request
             .headers()
             .iter()
@@ -54,33 +70,25 @@ impl HostRequest for Context {
         key: String,
         value: String,
     ) -> Result<(), String> {
-        let header_key = HeaderName::from_bytes(key.as_bytes()).map_err(|err| err.to_string())?;
-        let header_value = HeaderValue::from_str(&value).map_err(|err| err.to_string())?;
-        self.requests
-            .get_mut(&self_.rep())
-            .ok_or_else(|| "Request not in resource table".to_string())?
+        let key = http::HeaderName::from_bytes(key.as_bytes()).map_err(|e| e.to_string())?;
+        let value = http::HeaderValue::from_bytes(value.as_bytes()).map_err(|e| e.to_string())?;
+        self.retrieve_request_mut(self_.rep())?
             .headers_mut()
-            .insert(header_key, header_value);
-        Ok(())
+            .insert(key, value)
+            .map(|_| ())
+            .ok_or_else(|| "Failed to insert header".to_string())
     }
 
     fn uri(&mut self, self_: Resource<Request>) -> Result<String, String> {
-        let request = self
-            .requests
-            .get(&self_.rep())
-            .ok_or_else(|| "Request not in resource table".to_string())?;
-        Ok(request.uri().to_string())
+        self.retrieve_request_mut(self_.rep())
+            .map(|r| r.uri().to_string())
     }
 
     fn set_uri(&mut self, self_: Resource<Request>, uri: String) -> Result<(), String> {
-        let uri = Uri::from_maybe_shared(uri)
-            .map_err(|err| format!("Error assigning uri: {}", err.to_string()))?;
-        let request = self
-            .requests
-            .get_mut(&self_.rep())
-            .ok_or_else(|| "Request not in resource table".to_string())?;
-        *request.uri_mut() = uri;
-        Ok(())
+        let uri = http::Uri::from_str(&uri)
+            .map_err(|e| format!("Could not create uri {}: {}", uri, e.to_string()))?;
+        self.retrieve_request_mut(self_.rep())
+            .map(|s| *s.uri_mut() = uri)
     }
 
     fn drop(&mut self, self_: Resource<Request>) -> Result<()> {
