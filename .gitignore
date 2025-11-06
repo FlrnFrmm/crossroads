@@ -3,3 +3,5 @@ Cargo.lock
 target
 
 crates/**/main.rs
+
+**/*.sqlite

@@ -9,7 +9,7 @@ pub struct Configuration {
 impl Default for Configuration {
     fn default() -> Self {
         Self {
-            name: "roads".into(),
+            name: "crossroads".into(),
             path: ".".into(),
         }
     }

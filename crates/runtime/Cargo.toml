@@ -5,6 +5,10 @@ edition = "2024"
 
 [dependencies]
 anyhow.workspace = true
+chrono.workspace = true
 wasmtime.workspace = true
 wasmtime-wasi.workspace = true
 rama.workspace = true
+serde.workspace = true
+tokio.workspace = true
+http.workspace = true
