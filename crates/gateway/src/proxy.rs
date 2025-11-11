@@ -1,6 +1,8 @@
+use anyhow::Result;
 use rama::http::client::EasyHttpWebClient;
 use rama::http::{Body, Request, Response, StatusCode};
 use rama::{Context, Service};
+use runtime::resolution::Resolution;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 
@@ -28,7 +30,7 @@ where
         _context: Context<State>,
         request: Request,
     ) -> Result<Self::Response, Self::Error> {
-        let (callback, or) = oneshot::channel::<Result<Request, Response<Body>>>();
+        let (callback, or) = oneshot::channel::<Result<Resolution>>();
 
         let message = Message::ProcessRequest { request, callback };
         match self.sender.send(message) {
@@ -37,26 +39,40 @@ where
                 return Ok(Response::builder()
                     .status(StatusCode::BAD_GATEWAY)
                     .body("Failed to send to WebAssembly Runtime".into())
-                    .unwrap())
+                    .unwrap());
             }
         }
 
-        match or.await.unwrap() {
-            Ok(request) => {
-                let client = EasyHttpWebClient::default();
-                match client.serve(Context::default(), request).await {
-                    Ok(response) => Ok(response),
-                    Err(error) => {
-                        let error_message =
-                            format!("Failed to connect to destination: {}", error.to_string());
-                        Ok(Response::builder()
-                            .status(StatusCode::BAD_GATEWAY)
-                            .body(error_message.into())
-                            .unwrap())
+        match or.await {
+            Ok(resolution) => match resolution {
+                Resolution::Forward(request) => {
+                    let client = EasyHttpWebClient::default();
+                    match client.serve(Context::default(), request).await {
+                        Ok(response) => Ok(response),
+                        Err(error) => {
+                            let error_message =
+                                format!("Failed to connect to destination: {}", error.to_string());
+                            Ok(Response::builder()
+                                .status(StatusCode::BAD_GATEWAY)
+                                .body(error_message.into())
+                                .unwrap())
+                        }
                     }
                 }
+                Resolution::Respond(response) => Ok(response),
+            },
+            Err(e) => {
+                let response = Response::builder()
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(Body::from(format!("Internal Server Error: {}", e)))
+                    .unwrap();
+                Ok(response)
             }
-            Err(response) => Ok(response),
         }
     }
 }
+
+// Ok(resolution) => {
+
+// }
+// Err(response) => Ok(response),
