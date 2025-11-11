@@ -1,0 +1,10 @@
+package wit:crossroads@0.1.0;
+
+interface proxy {
+    use types.{resolution, request, response};
+    handle: func(request: request) -> resolution;
+}
+
+world crossroads {
+    export proxy;
+}
