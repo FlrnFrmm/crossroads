@@ -2,23 +2,23 @@ use axum::{http::StatusCode, Json};
 
 #[derive(Debug)]
 pub(super) enum Error {
-    HostAlreadyExists,
+    TagAlreadyExists,
     DatabaseError(crate::database::error::Error),
-    FailedToSendEvent,
+    FailedToSendMessage,
     FailedToLoad(anyhow::Error),
 }
 
 impl From<Error> for (StatusCode, Json<serde_json::Value>) {
     fn from(error: Error) -> Self {
         let (status, message) = match error {
-            Error::HostAlreadyExists => (
+            Error::TagAlreadyExists => (
                 StatusCode::CONFLICT,
                 format!("Host already exists, use update instead"),
             ),
             Error::DatabaseError(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
-            Error::FailedToSendEvent => (
+            Error::FailedToSendMessage => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to send event".to_string(),
+                "Failed to send message".to_string(),
             ),
             Error::FailedToLoad(e) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
