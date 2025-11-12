@@ -45,15 +45,15 @@ pub(super) async fn set_current_proxy(
     Ok(StatusCode::OK)
 }
 
-pub(super) async fn all_proxys(
+pub(super) async fn all_proxies(
     State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
 ) -> Result<Json<Vec<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
-    let proxys = db
+    let proxies = db
         .all_proxys()
         .await
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
-    Ok(Json(proxys))
+    Ok(Json(proxies))
 }
 
 pub(super) async fn create_proxy(
