@@ -17,9 +17,7 @@ libsql.workspace = true
 
 runtime = { path = "../runtime" }
 
-[dev-dependencies]
-tokio = { version = "1", features = ["macros", "time", "test-util"] }
-
+ 
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "time", "test-util"] }

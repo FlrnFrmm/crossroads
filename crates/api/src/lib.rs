@@ -32,7 +32,7 @@ impl API {
         let app = Router::new()
             .route("/proxys/current", get(endpoints::current_proxy))
             .route("/proxys/current/{tag}", get(endpoints::set_current_proxy))
-            .route("/proxys", get(endpoints::all_proxys))
+            .route("/proxys", get(endpoints::all_proxies))
             .route("/proxys/{tag}", post(endpoints::create_proxy))
             .route("/proxys/{tag}", get(endpoints::get_proxy))
             .route("/proxys/{tag}", put(endpoints::update_proxy))
