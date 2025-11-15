@@ -5,8 +5,8 @@ use std::str::FromStr;
 use wasmtime::component::{Resource, ResourceTable};
 use wasmtime_wasi::{WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView};
 
-use crate::Request;
-use crate::bindings::{Host, HostRequest};
+use super::bindings::{Host, HostRequest};
+use crate::runtime::Request;
 
 pub struct Context {
     pub wasi: WasiCtx,
