@@ -11,9 +11,9 @@ use resolution::Resolution;
 use runtime::Runtime;
 
 const DEFAULT_PROXY_LENGTH: usize =
-    include_bytes!("../../proxy/target/wasm32-wasip2/release/proxy.wasm").len();
+    include_bytes!("../../../target/wasm32-wasip2/release/proxy.wasm").len();
 const DEFAULT_PROXY: [u8; DEFAULT_PROXY_LENGTH] =
-    *include_bytes!("../../proxy/target/wasm32-wasip2/release/proxy.wasm");
+    *include_bytes!("../../../target/wasm32-wasip2/release/proxy.wasm");
 
 pub struct Handler {
     pub sender: UnboundedSender<Message>,

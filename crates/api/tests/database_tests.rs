@@ -1,131 +1,236 @@
-use std::{fs, io};
+use anyhow::{Result, anyhow, bail};
+use runtime::proxy::Proxy;
+use tokio::fs;
+use uuid::Uuid;
 
-use api::{configuration::database::Configuration, database::Database, road::Road};
-
- 
-#[tokio::test]
-async fn test_all_roads_empty()  {
-    let _ = cleanup();
-    let config = Configuration{name: "tests".to_string(),path: ".".to_string()};
-    let database : Database =  Database::new(&config).await.unwrap();
-
-    let road = database.all_roads().await.unwrap();
-    let _ = road.iter().map(|f| format!("{}",f.host));
-    assert_eq!(road.len(),0);
-
- 
-}
-
- 
-#[tokio::test]
-async fn test_create_road_() {
-    let _ = cleanup();
-    let config = Configuration{name: "tests".to_string(),path: ".".to_string()};
-    let database : Database =  Database::new(&config).await.unwrap();
- 
-    let another_road = Road{component: Vec::new(),host: "example.com".to_string()};
-    let road = database.create_road(another_road).await.unwrap();
-    assert!(road.is_some());
-    
-    let another_road = Road{component: Vec::new(),host: "example.com".to_string()};
-    let road: Option<Road> = database.create_road(another_road).await.unwrap();
-    assert!(road.is_none());
- 
-}
-
+use api::{configuration::database::Configuration, database::Database};
 
 #[tokio::test]
-async fn test_single_road_exists() {
-    let _ = cleanup();
-    let config = Configuration{name: "tests".to_string(),path: ".".to_string()};
-    let database : Database =  Database::new(&config).await.unwrap();
+async fn after_setup_all_proxies_empty() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
 
-    let road = database.road_exists("example.com").await.unwrap();
-    assert!(road.is_none());
+    let proxies = database.all_proxys().await?;
+    proxies.iter().for_each(|f| println!("{}", f.tag));
+    assert_eq!(proxies.len(), 0);
 
-    let another_road = Road{component: Vec::new(),host: "example.com".to_string()};
-    let road = database.create_road(another_road).await.unwrap();
-    assert!(road.is_some());
-    
-    let road = database.road_exists("example.com").await.unwrap();
-    assert!(road.is_some());
- 
+    Ok(())
 }
 
 #[tokio::test]
-async fn test_all_roads_populated()  {
-    let _ = cleanup();
-    let config = Configuration{name: "tests".to_string(),path: ".".to_string()};
-    let database : Database =  Database::new(&config).await.unwrap();
+async fn create_new_proxy() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
 
-    let road = database.all_roads().await.unwrap();
+    const TAG: &str = "alpha:v1.0.0";
+    let component = vec![0; 10];
+    let maybe_proxy_metadata = database
+        .create_proxy(TAG.to_string(), component.clone())
+        .await?;
+    assert!(maybe_proxy_metadata.is_some());
+    let Some(proxy_metadata) = maybe_proxy_metadata else {
+        bail!("Impossible ... Some is None after check");
+    };
+    assert_eq!(proxy_metadata.tag, TAG.to_string());
+    assert_eq!(proxy_metadata.created_at, proxy_metadata.updated_at);
+
+    let maybe_proxy = database.get_proxy(TAG).await?;
+    let Some(proxy) = maybe_proxy else {
+        bail!("Proxy does not exist after creation");
+    };
+    for (left, right) in component.iter().zip(proxy.component.iter()) {
+        assert_eq!(*left, *right);
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn single_proxy_exists() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
+
+    const TAG: &str = "alpha:v1.0.0";
+
+    let proxy = database.proxy_exists(TAG).await?;
+    assert!(proxy.is_none());
+
+    let component = vec![0; 10];
+    let maybe_proxy_metadata = database.create_proxy(TAG.to_string(), component).await?;
+    assert!(maybe_proxy_metadata.is_some());
+
+    let maybe_proxy_metadata = database.proxy_exists(TAG).await?;
+    assert!(maybe_proxy_metadata.is_some());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn all_proxies() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
+
+    let road = database.all_proxys().await.unwrap();
     assert_eq!(road.len(), 0);
 
-    let another_road = Road{component: Vec::new(),host: "example.com".to_string()};
-    let road = database.create_road(another_road).await.unwrap();
-    assert!(road.is_some());
+    let tags = vec!["alpha:v1.0.0", "beta:v1.0.0", "gamma:v1.0.0"];
+    for tag in tags.iter() {
+        let component = vec![0; 10];
+        let maybe_proxy_metadata = database.create_proxy(tag.to_string(), component).await?;
+        assert!(maybe_proxy_metadata.is_some());
+    }
 
-    let road = database.all_roads().await.unwrap();
-    assert_eq!(road.len(), 1);
- 
+    let proxies_metadata = database.all_proxys().await?;
+    assert_eq!(proxies_metadata.len(), tags.len());
+    for proxy_metadata in proxies_metadata.iter() {
+        assert!(tags.contains(&proxy_metadata.tag.as_str()));
+    }
+
+    Ok(())
 }
 
 #[tokio::test]
-async fn test_update_road(){
-    let _ = cleanup();
-    let config = Configuration{name:"tests".to_string(),path: ".".to_string()};
-    let database : Database =  Database::new(&config).await.unwrap();
- 
-    let another_road = Road{component: Vec::new(),host: "example.com".to_string()};
-    let road = database.create_road(another_road).await.unwrap();
-    assert!(road.is_some());
+async fn update_road() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
 
-    let road = database.all_roads().await.unwrap();
-    assert_eq!(road.len(), 1);
+    const TAG: &str = "alpha:v1.0.0";
+    let component = vec![0; 10];
+    let maybe_proxy_metadata = database
+        .create_proxy(TAG.to_string(), component.clone())
+        .await?;
+    assert!(maybe_proxy_metadata.is_some());
 
-    let mut component = Vec::new();
-    component.push(1);
+    let maybe_proxy = database.get_proxy(TAG).await?;
+    let Some(proxy) = maybe_proxy else {
+        bail!("Proxy does not exist after creation");
+    };
+    for (left, right) in component.iter().zip(proxy.component.iter()) {
+        assert_eq!(*left, *right);
+    }
 
-    let another_road = Road{component: component,host: "example.com".to_string()};
-    let road = database.update_road(another_road).await.unwrap();
-    assert!(road.is_some());
-    let road = road.unwrap();
-    assert_eq!(road.component.len(), 1);
+    let component = vec![1; 10];
 
- 
+    let proxy_metadata = database
+        .update_proxy(TAG.to_string(), component.clone())
+        .await?;
+    assert!(proxy_metadata.is_some());
+
+    let maybe_proxy = database.get_proxy(TAG).await?;
+    let Some(proxy) = maybe_proxy else {
+        bail!("Proxy does not exist after creation");
+    };
+    for (left, right) in component.iter().zip(proxy.component.iter()) {
+        assert_eq!(*left, *right);
+    }
+
+    Ok(())
 }
 
 #[tokio::test]
-async fn test_delete_road(){
-    let _ = cleanup();
-    let config = Configuration{name: "tests".to_string(),path: ".".to_string()};
-    let database : Database =  Database::new(&config).await.unwrap();
+async fn delete_proxy() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
 
-    let road =  database.delete_road("example.com".to_string()).await;
-    assert!(road.is_ok());
-    assert!(road.unwrap().is_none());
+    const TAG: &str = "alpha:v1.0.0";
+    let proxy_metadata = database.delete_proxy(TAG.to_string()).await?;
+    assert!(proxy_metadata.is_none());
 
-    let another_road = Road{component: Vec::new(),host: "example.com".to_string()};
-    let road = database.create_road(another_road).await.unwrap();
-    assert!(road.is_some());
+    let component = vec![0; 10];
+    let maybe_proxy_metadata = database
+        .create_proxy(TAG.to_string(), component.clone())
+        .await?;
+    assert!(maybe_proxy_metadata.is_some());
 
-    let road = database.road_exists("example.com").await;
-    assert!(road.is_ok());
-    assert!(road.unwrap().is_some());
+    let maybe_proxy_metadata = database.proxy_exists(TAG).await?;
+    assert!(maybe_proxy_metadata.is_some());
 
-    let result = database.delete_road("example.com".to_string()).await;
-    assert!(result.is_ok());
-    assert!(result.unwrap().is_some());
+    let proxy_metadata = database.delete_proxy(TAG.to_string()).await?;
+    assert!(proxy_metadata.is_some());
 
-    let road = database.road_exists("example.com").await;
-    assert!(road.is_ok());
-    assert!(road.unwrap().is_none());
-}
- 
+    let maybe_proxy_metadata = database.proxy_exists(TAG).await?;
+    assert!(maybe_proxy_metadata.is_none());
 
-  fn cleanup() -> io::Result<()> {
-    let config = Configuration{name: "tests".to_string(),path: ".".to_string()};
-    let path = format!("{}/{}.sqlite", config.path, config.name);
-    fs::remove_file(path)
+    Ok(())
 }
 
+#[tokio::test]
+async fn get_not_set_current_proxy() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
+
+    const TAG: &str = "alpha:v1.0.0";
+    let maybedatabase = database.get_proxy(TAG).await?;
+    assert!(maybedatabase.is_none());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn set_current_proxy_to_nonexisting_proxy() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
+
+    const TAG: &str = "alpha:v1.0.0";
+    let maybe_proxy = database.set_current_proxy(TAG).await?;
+    assert!(maybe_proxy.is_none());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn set_current_proxy() -> Result<()> {
+    let database = &DatabaseWrapper::setup().await?.database;
+
+    const TAG: &str = "alpha:v1.0.0";
+    let component = vec![0; 10];
+    let maybe_proxy_metadata = database
+        .create_proxy(TAG.to_string(), component.clone())
+        .await?;
+    assert!(maybe_proxy_metadata.is_some());
+
+    let Some(created_current_proxy) = database.set_current_proxy(TAG).await? else {
+        panic!("Created current proxy does not exist after setting")
+    };
+
+    let Some(current_proxy_metadata) = database.get_current_proxy().await? else {
+        panic!("Current proxy metadata does not exist after setting")
+    };
+
+    let Some(current_proxy) = database.get_proxy(&current_proxy_metadata.tag).await? else {
+        panic!("Current proxy does not exist after setting")
+    };
+
+    assert_eq!(
+        created_current_proxy.metadata.tag,
+        current_proxy.metadata.tag
+    );
+
+    for (left, right) in created_current_proxy
+        .component
+        .iter()
+        .zip(current_proxy.component.iter())
+    {
+        assert_eq!(*left, *right);
+    }
+    Ok(())
+}
+
+struct DatabaseWrapper {
+    uuid: Uuid,
+    database: Database,
+}
+
+impl DatabaseWrapper {
+    pub async fn setup() -> Result<Self> {
+        let uuid = Uuid::new_v4();
+        let configuration = Configuration {
+            name: uuid.to_string(),
+            path: ".".to_string(),
+        };
+        let database = Database::new(&configuration).await?;
+        Ok(Self { uuid, database })
+    }
+}
+
+impl Drop for DatabaseWrapper {
+    fn drop(&mut self) {
+        let path = format!("./{}.sqlite", self.uuid);
+        match std::fs::remove_file(path) {
+            Ok(_) => (),
+            Err(e) => println!("Error removing sqlite db file: {}", e),
+        }
+    }
+}
