@@ -1,8 +1,8 @@
 pub(crate) mod error;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use chrono::NaiveDateTime;
-use libsql::{params, params::IntoParams, Builder, Row, Rows};
+use libsql::{Builder, Row, Rows, params, params::IntoParams};
 
 use crate::configuration::database::Configuration;
 use runtime::proxy::{Proxy, ProxyMetadata};
@@ -128,7 +128,7 @@ impl Database {
     }
 
     pub async fn get_proxy(&self, tag: &str) -> Result<Option<Proxy>> {
-        let statement = "SELECT tag, created_at, updated_at, component FROM proxy WHERE tag = ?;";
+        let statement = "SELECT tag, created_at, updated_at, component FROM proxys WHERE tag = ?;";
         let mut rows = self.query(statement, params![tag]).await?;
         Self::try_to_proxy(&mut rows).await
     }
