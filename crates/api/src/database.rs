@@ -25,29 +25,29 @@ impl Database {
         let connection = self.handle.connect()?;
         let statements = [
             r#"
-            CREATE TABLE IF NOT EXISTS proxys (
+            CREATE TABLE IF NOT EXISTS proxies (
                 tag TEXT PRIMARY KEY,
                 created_at TEXT NOT NULL DEFAULT current_timestamp,
                 updated_at TEXT NOT NULL DEFAULT current_timestamp,
                 component BLOB NOT NULL
             );"#,
-            r#"CREATE TRIGGER IF NOT EXISTS update_proxys_updated_at
-            AFTER UPDATE ON proxys
+            r#"CREATE TRIGGER IF NOT EXISTS update_proxies_updated_at
+            AFTER UPDATE ON proxies
             FOR EACH ROW
             BEGIN
-                UPDATE proxys SET updated_at = CURRENT_TIMESTAMP WHERE tag = OLD.tag;
+                UPDATE proxies SET updated_at = CURRENT_TIMESTAMP WHERE tag = OLD.tag;
             END;"#,
             r#"CREATE TABLE IF NOT EXISTS current_proxy (
                 singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
                 selected_tag TEXT,
-                FOREIGN KEY (selected_tag) REFERENCES proxys(tag)
+                FOREIGN KEY (selected_tag) REFERENCES proxies(tag)
                     ON DELETE SET NULL
                     ON UPDATE CASCADE
             );"#,
             r#"INSERT OR IGNORE INTO current_proxy (singleton, selected_tag) VALUES (1, NULL);"#,
             r#"CREATE VIEW IF NOT EXISTS proxy AS
             SELECT p.*
-            FROM   proxys p
+            FROM   proxies p
             JOIN   current_proxy s ON p.tag = s.selected_tag
             WHERE  s.singleton = 1;"#,
         ];
@@ -81,8 +81,8 @@ impl Database {
         self.get_proxy(tag).await
     }
 
-    pub async fn all_proxys(&self) -> Result<Vec<ProxyMetadata>> {
-        let statement = "SELECT tag, created_at, updated_at FROM proxys;";
+    pub async fn all_proxies(&self) -> Result<Vec<ProxyMetadata>> {
+        let statement = "SELECT tag, created_at, updated_at FROM proxies;";
         let mut rows = self.query(statement, ()).await?;
         let mut result = Vec::with_capacity(rows.column_count() as usize);
         while let Some(row) = rows.next().await? {
@@ -100,7 +100,7 @@ impl Database {
         if self.proxy_exists(&tag).await?.is_some() {
             return Ok(None);
         }
-        let statement = "INSERT INTO proxys (tag, component) VALUES (?, ?) RETURNING *;";
+        let statement = "INSERT INTO proxies (tag, component) VALUES (?, ?) RETURNING *;";
         let mut rows = self.query(statement, params![tag, component]).await?;
         Self::try_to_proxy_metadata(&mut rows).await
     }
@@ -110,25 +110,25 @@ impl Database {
         tag: String,
         component: Vec<u8>,
     ) -> Result<Option<ProxyMetadata>> {
-        let statement = "UPDATE proxys SET component = ? WHERE tag = ? RETURNING *;";
+        let statement = "UPDATE proxies SET component = ? WHERE tag = ? RETURNING *;";
         let mut rows = self.query(statement, params![component, tag]).await?;
         Self::try_to_proxy_metadata(&mut rows).await
     }
 
     pub async fn delete_proxy(&self, tag: String) -> Result<Option<ProxyMetadata>> {
-        let statement = "DELETE FROM proxys WHERE tag = ? RETURNING *;";
+        let statement = "DELETE FROM proxies WHERE tag = ? RETURNING *;";
         let mut rows = self.query(statement, params![tag]).await?;
         Self::try_to_proxy_metadata(&mut rows).await
     }
 
     pub async fn proxy_exists(&self, tag: &str) -> Result<Option<ProxyMetadata>> {
-        let statement = "SELECT * FROM proxys WHERE tag = ?;";
+        let statement = "SELECT * FROM proxies WHERE tag = ?;";
         let mut rows = self.query(statement, params![tag]).await?;
         Self::try_to_proxy_metadata(&mut rows).await
     }
 
     pub async fn get_proxy(&self, tag: &str) -> Result<Option<Proxy>> {
-        let statement = "SELECT tag, created_at, updated_at, component FROM proxys WHERE tag = ?;";
+        let statement = "SELECT tag, created_at, updated_at, component FROM proxies WHERE tag = ?;";
         let mut rows = self.query(statement, params![tag]).await?;
         Self::try_to_proxy(&mut rows).await
     }

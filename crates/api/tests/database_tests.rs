@@ -7,7 +7,7 @@ use api::{configuration::database::Configuration, database::Database};
 async fn after_setup_all_proxies_empty() -> Result<()> {
     let database = &DatabaseWrapper::setup().await?.database;
 
-    let proxies = database.all_proxys().await?;
+    let proxies = database.all_proxies().await?;
     proxies.iter().for_each(|f| println!("{}", f.tag));
     assert_eq!(proxies.len(), 0);
 
@@ -64,8 +64,8 @@ async fn single_proxy_exists() -> Result<()> {
 async fn all_proxies() -> Result<()> {
     let database = &DatabaseWrapper::setup().await?.database;
 
-    let road = database.all_proxys().await.unwrap();
-    assert_eq!(road.len(), 0);
+    let proxies = database.all_proxies().await.unwrap();
+    assert_eq!(proxies.len(), 0);
 
     let tags = vec!["alpha:v1.0.0", "beta:v1.0.0", "gamma:v1.0.0"];
     for tag in tags.iter() {
@@ -74,7 +74,7 @@ async fn all_proxies() -> Result<()> {
         assert!(maybe_proxy_metadata.is_some());
     }
 
-    let proxies_metadata = database.all_proxys().await?;
+    let proxies_metadata = database.all_proxies().await?;
     assert_eq!(proxies_metadata.len(), tags.len());
     for proxy_metadata in proxies_metadata.iter() {
         assert!(tags.contains(&proxy_metadata.tag.as_str()));
@@ -84,7 +84,7 @@ async fn all_proxies() -> Result<()> {
 }
 
 #[tokio::test]
-async fn update_road() -> Result<()> {
+async fn update_proxy() -> Result<()> {
     let database = &DatabaseWrapper::setup().await?.database;
 
     const TAG: &str = "alpha:v1.0.0";
