@@ -1,3 +1,4 @@
-[submodule "wit"]
+[submodule "crates/proxy/wit"]
 	path = crates/proxy/wit
 	url = git@github.com:crossroads-rs/wit.git
+	branch = feat/remove-resource
