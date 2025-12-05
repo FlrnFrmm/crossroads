@@ -62,7 +62,7 @@ pub(super) async fn create_proxy(
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
     let component = loader.load().map_err(|e| ApiErr::FailedToLoad(e))?;
-    let Some(_host) = db
+    let Some(_tag) = db
         .create_proxy(tag, component.clone())
         .await
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToCreateRoad))?
@@ -118,11 +118,11 @@ pub(super) async fn update_proxy(
 
 pub(super) async fn delete_proxy(
     State((db, runtime)): State<(Arc<RwLock<Database>>, Runtime)>,
-    Path(host): Path<String>,
+    Path(tag): Path<String>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
     if let Some(proxy_metadata) = db
-        .delete_proxy(host)
+        .delete_proxy(tag)
         .await
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToDeleteRoad))?
     {
