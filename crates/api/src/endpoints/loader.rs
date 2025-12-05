@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub enum Loader {
+    #[serde(rename = "payload")]
     Payload(Vec<u8>),
+    #[serde(rename = "registryCredentials")]
     Registry(RegistryCredentials), // Todo
 }
 

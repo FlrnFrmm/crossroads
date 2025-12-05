@@ -26,6 +26,7 @@ impl Runtime {
     pub fn new(default_proxy: &[u8]) -> Result<Self> {
         let engine = wasmtime::Engine::default();
         let mut linker = Linker::new(&engine);
+
         wasmtime_wasi::p2::add_to_linker_sync(&mut linker)?;
         bindings::add_to_linker(&mut linker)?;
         let component = Component::from_binary(&engine, default_proxy)?;
@@ -76,8 +77,12 @@ fn extract_proxy_function(
     store: &mut Store<context::Context>,
     component: &Component,
 ) -> Result<ProxyFunc> {
-    let instance = linker.instantiate(&mut *store, component)?;
-
+    let instance_pre = linker
+        .instantiate_pre(component)
+        .map_err(|e| anyhow!("Failed to pre instantiate component: {}", e))?;
+    let instance = instance_pre
+        .instantiate(&mut *store)
+        .map_err(|e| anyhow!("Failed to instantiate component: {}", e))?;
     let interface_namespace = "wit:crossroads/proxy@0.1.0";
     let interface_idx = instance
         .get_export_index(&mut *store, None, interface_namespace)
