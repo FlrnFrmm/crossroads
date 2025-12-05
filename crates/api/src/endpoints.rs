@@ -6,17 +6,16 @@ use axum::http::StatusCode;
 use axum::response::Json;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tokio::sync::mpsc::UnboundedSender;
 
 use crate::database::Database;
 use crate::database::error::Error as DbErr;
 use crate::error::Error as ApiErr;
 use loader::Loader;
-use runtime::Message;
+use runtime::Runtime;
 use runtime::proxy::ProxyMetadata;
 
 pub(super) async fn current_proxy(
-    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Runtime)>,
 ) -> Result<Json<Option<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
     let proxy = db
@@ -27,7 +26,7 @@ pub(super) async fn current_proxy(
 }
 
 pub(super) async fn set_current_proxy(
-    State((db, sender)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, runtime)): State<(Arc<RwLock<Database>>, Runtime)>,
     Path(tag): Path<String>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
@@ -38,15 +37,15 @@ pub(super) async fn set_current_proxy(
     let Some(proxy) = maybe_proxy_metadata else {
         return Ok(StatusCode::NOT_FOUND);
     };
-    let message = Message::SetComponent(proxy);
-    sender
-        .send(message)
+
+    runtime
+        .set_proxy(&proxy.component)
         .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
     Ok(StatusCode::OK)
 }
 
 pub(super) async fn all_proxies(
-    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Runtime)>,
 ) -> Result<Json<Vec<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
     let proxys = db
@@ -57,7 +56,7 @@ pub(super) async fn all_proxies(
 }
 
 pub(super) async fn create_proxy(
-    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Runtime)>,
     Path(tag): Path<String>,
     Json(loader): Json<Loader>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
@@ -74,7 +73,7 @@ pub(super) async fn create_proxy(
 }
 
 pub(super) async fn get_proxy(
-    State((db, _)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, _)): State<(Arc<RwLock<Database>>, Runtime)>,
     Path(tag): Path<String>,
 ) -> Result<Json<Option<ProxyMetadata>>, (StatusCode, Json<serde_json::Value>)> {
     let db = db.read().await;
@@ -86,7 +85,7 @@ pub(super) async fn get_proxy(
 }
 
 pub(super) async fn update_proxy(
-    State((db, sender)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, runtime)): State<(Arc<RwLock<Database>>, Runtime)>,
     Path(tag): Path<String>,
     Json(loader): Json<Loader>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
@@ -110,15 +109,15 @@ pub(super) async fn update_proxy(
             .await
             .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?
             .ok_or(ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
-        sender
-            .send(Message::SetComponent(current_proxy))
+        runtime
+            .set_proxy(&current_proxy.component)
             .map_err(|_| ApiErr::FailedToSendMessage)?;
     }
     Ok(StatusCode::OK)
 }
 
 pub(super) async fn delete_proxy(
-    State((db, sender)): State<(Arc<RwLock<Database>>, UnboundedSender<Message>)>,
+    State((db, runtime)): State<(Arc<RwLock<Database>>, Runtime)>,
     Path(host): Path<String>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
     let db = db.write().await;
@@ -138,8 +137,8 @@ pub(super) async fn delete_proxy(
                 .await
                 .map_err(|_| ApiErr::DatabaseError(DbErr::UnableToReadRoads))?
                 .ok_or(ApiErr::DatabaseError(DbErr::UnableToReadRoads))?;
-            sender
-                .send(Message::SetComponent(current_proxy))
+            runtime
+                .set_proxy(&current_proxy.component)
                 .map_err(|_| ApiErr::FailedToSendMessage)?;
         }
     }

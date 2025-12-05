@@ -3,11 +3,10 @@ mod proxy;
 
 use anyhow::{Error, Result};
 use rama::{http::server::HttpServer, rt::Executor};
-use tokio::sync::mpsc::UnboundedSender;
 
 use configuration::Configuration;
 
-use runtime::Message;
+use runtime::Runtime;
 
 pub struct Gateway {
     port: u16,
@@ -21,10 +20,11 @@ impl Gateway {
         Ok(gateway)
     }
 
-    pub async fn run(&self, sender: UnboundedSender<Message>) -> Result<()> {
+    pub async fn run(&self, runtime: Runtime) -> Result<()> {
         let executor = Executor::default();
         let address = ([0, 0, 0, 0], self.port);
-        let proxy = proxy::WebAssemblyComponentProxy::new(sender);
+        
+        let proxy = proxy::WebAssemblyComponentProxy::new(runtime);
         HttpServer::auto(executor)
             .listen(address, proxy)
             .await

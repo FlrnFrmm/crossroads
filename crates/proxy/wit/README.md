@@ -1,1 +1,0 @@
-# Crossroads WIT Definitions

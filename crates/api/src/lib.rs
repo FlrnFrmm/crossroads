@@ -8,11 +8,10 @@ use axum::Router;
 use axum::routing::{delete, get, post, put};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tokio::sync::mpsc::UnboundedSender;
 
 use crate::database::Database;
 use configuration::Configuration;
-use runtime::Message;
+use runtime::Runtime;
 
 pub struct API {
     port: u16,
@@ -28,7 +27,7 @@ impl API {
         Ok(api)
     }
 
-    pub async fn run(self, sender: UnboundedSender<Message>) -> Result<()> {
+    pub async fn run(self, runtime: Runtime) -> Result<()> {
         let app = Router::new()
             .route("/proxys/current", get(endpoints::current_proxy))
             .route("/proxys/current/{tag}", get(endpoints::set_current_proxy))
@@ -37,7 +36,7 @@ impl API {
             .route("/proxys/{tag}", get(endpoints::get_proxy))
             .route("/proxys/{tag}", put(endpoints::update_proxy))
             .route("/proxys/{tag}", delete(endpoints::delete_proxy))
-            .with_state((Arc::new(RwLock::new(self.database)), sender));
+            .with_state((Arc::new(RwLock::new(self.database)), runtime));
         let address = format!("0.0.0.0:{}", self.port);
         let listener = tokio::net::TcpListener::bind(address).await?;
         axum::serve(listener, app).await.map_err(|err| err.into())

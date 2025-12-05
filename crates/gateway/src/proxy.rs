@@ -3,17 +3,17 @@ use rama::http::client::EasyHttpWebClient;
 use rama::http::{Body, Request, Response, StatusCode};
 use rama::{Context, Service};
 use runtime::resolution::Resolution;
-use tokio::sync::mpsc::UnboundedSender;
 
-use runtime::Message;
+use runtime::Runtime;
 
+#[derive(Clone)]
 pub struct WebAssemblyComponentProxy {
-    sender: UnboundedSender<Message>,
+    runtime: Runtime,
 }
 
 impl WebAssemblyComponentProxy {
-    pub fn new(sender: UnboundedSender<Message>) -> Self {
-        Self { sender }
+    pub fn new(runtime: Runtime) -> Self {
+        Self { runtime }
     }
 }
 
@@ -29,17 +29,7 @@ where
         _context: Context<State>,
         request: Request,
     ) -> Result<Self::Response, Self::Error> {
-        let (message, receiver) = Message::new_process_request(request);
-        match self.sender.send(message) {
-            Ok(_) => (),
-            Err(_) => {
-                return Ok(Response::builder()
-                    .status(StatusCode::BAD_GATEWAY)
-                    .body("Failed to send to WebAssembly Runtime".into())
-                    .unwrap());
-            }
-        }
-        match receiver.await {
+        match self.runtime.process(request) {
             Ok(resolution) => match resolution {
                 Resolution::Forward(request) => {
                     let client = EasyHttpWebClient::default();

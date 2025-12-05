@@ -6,48 +6,251 @@
 pub mod wit {
     pub mod crossroads {
         #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
+        pub mod request {
+            #[used]
+            #[doc(hidden)]
+            static __FORCE_SECTION_REF: fn() = super::super::super::__link_custom_section_describing_imports;
+            use super::super::super::_rt;
+            #[allow(unused_unsafe, clippy::all)]
+            pub fn headers() -> _rt::Vec<(_rt::String, _rt::String)> {
+                unsafe {
+                    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+                    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+                    struct RetArea(
+                        [::core::mem::MaybeUninit<
+                            u8,
+                        >; 2 * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let mut ret_area = RetArea(
+                        [::core::mem::MaybeUninit::uninit(); 2
+                            * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
+                    #[cfg(target_arch = "wasm32")]
+                    #[link(wasm_import_module = "wit:crossroads/request@0.1.0")]
+                    unsafe extern "C" {
+                        #[link_name = "headers"]
+                        fn wit_import1(_: *mut u8);
+                    }
+                    #[cfg(not(target_arch = "wasm32"))]
+                    unsafe extern "C" fn wit_import1(_: *mut u8) {
+                        unreachable!()
+                    }
+                    unsafe { wit_import1(ptr0) };
+                    let l2 = *ptr0.add(0).cast::<*mut u8>();
+                    let l3 = *ptr0
+                        .add(::core::mem::size_of::<*const u8>())
+                        .cast::<usize>();
+                    let base10 = l2;
+                    let len10 = l3;
+                    let mut result10 = _rt::Vec::with_capacity(len10);
+                    for i in 0..len10 {
+                        let base = base10
+                            .add(i * (4 * ::core::mem::size_of::<*const u8>()));
+                        let e10 = {
+                            let l4 = *base.add(0).cast::<*mut u8>();
+                            let l5 = *base
+                                .add(::core::mem::size_of::<*const u8>())
+                                .cast::<usize>();
+                            let len6 = l5;
+                            let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+                            let l7 = *base
+                                .add(2 * ::core::mem::size_of::<*const u8>())
+                                .cast::<*mut u8>();
+                            let l8 = *base
+                                .add(3 * ::core::mem::size_of::<*const u8>())
+                                .cast::<usize>();
+                            let len9 = l8;
+                            let bytes9 = _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
+                            (_rt::string_lift(bytes6), _rt::string_lift(bytes9))
+                        };
+                        result10.push(e10);
+                    }
+                    _rt::cabi_dealloc(
+                        base10,
+                        len10 * (4 * ::core::mem::size_of::<*const u8>()),
+                        ::core::mem::size_of::<*const u8>(),
+                    );
+                    let result11 = result10;
+                    result11
+                }
+            }
+            #[allow(unused_unsafe, clippy::all)]
+            pub fn set_header(key: &str, value: &str) -> Result<(), _rt::String> {
+                unsafe {
+                    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+                    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+                    struct RetArea(
+                        [::core::mem::MaybeUninit<
+                            u8,
+                        >; 3 * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let mut ret_area = RetArea(
+                        [::core::mem::MaybeUninit::uninit(); 3
+                            * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let vec0 = key;
+                    let ptr0 = vec0.as_ptr().cast::<u8>();
+                    let len0 = vec0.len();
+                    let vec1 = value;
+                    let ptr1 = vec1.as_ptr().cast::<u8>();
+                    let len1 = vec1.len();
+                    let ptr2 = ret_area.0.as_mut_ptr().cast::<u8>();
+                    #[cfg(target_arch = "wasm32")]
+                    #[link(wasm_import_module = "wit:crossroads/request@0.1.0")]
+                    unsafe extern "C" {
+                        #[link_name = "set-header"]
+                        fn wit_import3(
+                            _: *mut u8,
+                            _: usize,
+                            _: *mut u8,
+                            _: usize,
+                            _: *mut u8,
+                        );
+                    }
+                    #[cfg(not(target_arch = "wasm32"))]
+                    unsafe extern "C" fn wit_import3(
+                        _: *mut u8,
+                        _: usize,
+                        _: *mut u8,
+                        _: usize,
+                        _: *mut u8,
+                    ) {
+                        unreachable!()
+                    }
+                    unsafe {
+                        wit_import3(ptr0.cast_mut(), len0, ptr1.cast_mut(), len1, ptr2)
+                    };
+                    let l4 = i32::from(*ptr2.add(0).cast::<u8>());
+                    let result8 = match l4 {
+                        0 => {
+                            let e = ();
+                            Ok(e)
+                        }
+                        1 => {
+                            let e = {
+                                let l5 = *ptr2
+                                    .add(::core::mem::size_of::<*const u8>())
+                                    .cast::<*mut u8>();
+                                let l6 = *ptr2
+                                    .add(2 * ::core::mem::size_of::<*const u8>())
+                                    .cast::<usize>();
+                                let len7 = l6;
+                                let bytes7 = _rt::Vec::from_raw_parts(
+                                    l5.cast(),
+                                    len7,
+                                    len7,
+                                );
+                                _rt::string_lift(bytes7)
+                            };
+                            Err(e)
+                        }
+                        _ => _rt::invalid_enum_discriminant(),
+                    };
+                    result8
+                }
+            }
+            #[allow(unused_unsafe, clippy::all)]
+            pub fn uri() -> _rt::String {
+                unsafe {
+                    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+                    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+                    struct RetArea(
+                        [::core::mem::MaybeUninit<
+                            u8,
+                        >; 2 * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let mut ret_area = RetArea(
+                        [::core::mem::MaybeUninit::uninit(); 2
+                            * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
+                    #[cfg(target_arch = "wasm32")]
+                    #[link(wasm_import_module = "wit:crossroads/request@0.1.0")]
+                    unsafe extern "C" {
+                        #[link_name = "uri"]
+                        fn wit_import1(_: *mut u8);
+                    }
+                    #[cfg(not(target_arch = "wasm32"))]
+                    unsafe extern "C" fn wit_import1(_: *mut u8) {
+                        unreachable!()
+                    }
+                    unsafe { wit_import1(ptr0) };
+                    let l2 = *ptr0.add(0).cast::<*mut u8>();
+                    let l3 = *ptr0
+                        .add(::core::mem::size_of::<*const u8>())
+                        .cast::<usize>();
+                    let len4 = l3;
+                    let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+                    let result5 = _rt::string_lift(bytes4);
+                    result5
+                }
+            }
+            #[allow(unused_unsafe, clippy::all)]
+            pub fn set_uri(uri: &str) -> Result<(), _rt::String> {
+                unsafe {
+                    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+                    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+                    struct RetArea(
+                        [::core::mem::MaybeUninit<
+                            u8,
+                        >; 3 * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let mut ret_area = RetArea(
+                        [::core::mem::MaybeUninit::uninit(); 3
+                            * ::core::mem::size_of::<*const u8>()],
+                    );
+                    let vec0 = uri;
+                    let ptr0 = vec0.as_ptr().cast::<u8>();
+                    let len0 = vec0.len();
+                    let ptr1 = ret_area.0.as_mut_ptr().cast::<u8>();
+                    #[cfg(target_arch = "wasm32")]
+                    #[link(wasm_import_module = "wit:crossroads/request@0.1.0")]
+                    unsafe extern "C" {
+                        #[link_name = "set-uri"]
+                        fn wit_import2(_: *mut u8, _: usize, _: *mut u8);
+                    }
+                    #[cfg(not(target_arch = "wasm32"))]
+                    unsafe extern "C" fn wit_import2(_: *mut u8, _: usize, _: *mut u8) {
+                        unreachable!()
+                    }
+                    unsafe { wit_import2(ptr0.cast_mut(), len0, ptr1) };
+                    let l3 = i32::from(*ptr1.add(0).cast::<u8>());
+                    let result7 = match l3 {
+                        0 => {
+                            let e = ();
+                            Ok(e)
+                        }
+                        1 => {
+                            let e = {
+                                let l4 = *ptr1
+                                    .add(::core::mem::size_of::<*const u8>())
+                                    .cast::<*mut u8>();
+                                let l5 = *ptr1
+                                    .add(2 * ::core::mem::size_of::<*const u8>())
+                                    .cast::<usize>();
+                                let len6 = l5;
+                                let bytes6 = _rt::Vec::from_raw_parts(
+                                    l4.cast(),
+                                    len6,
+                                    len6,
+                                );
+                                _rt::string_lift(bytes6)
+                            };
+                            Err(e)
+                        }
+                        _ => _rt::invalid_enum_discriminant(),
+                    };
+                    result7
+                }
+            }
+        }
+        #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
         pub mod types {
             #[used]
             #[doc(hidden)]
             static __FORCE_SECTION_REF: fn() = super::super::super::__link_custom_section_describing_imports;
             use super::super::super::_rt;
-            #[derive(Debug)]
-            #[repr(transparent)]
-            pub struct Request {
-                handle: _rt::Resource<Request>,
-            }
-            impl Request {
-                #[doc(hidden)]
-                pub unsafe fn from_handle(handle: u32) -> Self {
-                    Self {
-                        handle: unsafe { _rt::Resource::from_handle(handle) },
-                    }
-                }
-                #[doc(hidden)]
-                pub fn take_handle(&self) -> u32 {
-                    _rt::Resource::take_handle(&self.handle)
-                }
-                #[doc(hidden)]
-                pub fn handle(&self) -> u32 {
-                    _rt::Resource::handle(&self.handle)
-                }
-            }
-            unsafe impl _rt::WasmResource for Request {
-                #[inline]
-                unsafe fn drop(_handle: u32) {
-                    #[cfg(not(target_arch = "wasm32"))]
-                    unreachable!();
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        #[link(wasm_import_module = "wit:crossroads/types@0.1.0")]
-                        unsafe extern "C" {
-                            #[link_name = "[resource-drop]request"]
-                            fn drop(_: u32);
-                        }
-                        unsafe { drop(_handle) };
-                    }
-                }
-            }
             #[derive(Clone)]
             pub struct Response {
                 pub status_code: u16,
@@ -64,8 +267,9 @@ pub mod wit {
                         .finish()
                 }
             }
+            #[derive(Clone)]
             pub enum Resolution {
-                Forward(Request),
+                Forward,
                 Respond(Response),
             }
             impl ::core::fmt::Debug for Resolution {
@@ -74,350 +278,12 @@ pub mod wit {
                     f: &mut ::core::fmt::Formatter<'_>,
                 ) -> ::core::fmt::Result {
                     match self {
-                        Resolution::Forward(e) => {
-                            f.debug_tuple("Resolution::Forward").field(e).finish()
+                        Resolution::Forward => {
+                            f.debug_tuple("Resolution::Forward").finish()
                         }
                         Resolution::Respond(e) => {
                             f.debug_tuple("Resolution::Respond").field(e).finish()
                         }
-                    }
-                }
-            }
-            impl Request {
-                #[allow(unused_unsafe, clippy::all)]
-                pub fn headers(
-                    &self,
-                ) -> Result<_rt::Vec<(_rt::String, _rt::String)>, _rt::String> {
-                    unsafe {
-                        #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
-                        #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
-                        struct RetArea(
-                            [::core::mem::MaybeUninit<
-                                u8,
-                            >; 3 * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let mut ret_area = RetArea(
-                            [::core::mem::MaybeUninit::uninit(); 3
-                                * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
-                        #[cfg(target_arch = "wasm32")]
-                        #[link(wasm_import_module = "wit:crossroads/types@0.1.0")]
-                        unsafe extern "C" {
-                            #[link_name = "[method]request.headers"]
-                            fn wit_import1(_: i32, _: *mut u8);
-                        }
-                        #[cfg(not(target_arch = "wasm32"))]
-                        unsafe extern "C" fn wit_import1(_: i32, _: *mut u8) {
-                            unreachable!()
-                        }
-                        unsafe { wit_import1((self).handle() as i32, ptr0) };
-                        let l2 = i32::from(*ptr0.add(0).cast::<u8>());
-                        let result15 = match l2 {
-                            0 => {
-                                let e = {
-                                    let l3 = *ptr0
-                                        .add(::core::mem::size_of::<*const u8>())
-                                        .cast::<*mut u8>();
-                                    let l4 = *ptr0
-                                        .add(2 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<usize>();
-                                    let base11 = l3;
-                                    let len11 = l4;
-                                    let mut result11 = _rt::Vec::with_capacity(len11);
-                                    for i in 0..len11 {
-                                        let base = base11
-                                            .add(i * (4 * ::core::mem::size_of::<*const u8>()));
-                                        let e11 = {
-                                            let l5 = *base.add(0).cast::<*mut u8>();
-                                            let l6 = *base
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len7 = l6;
-                                            let bytes7 = _rt::Vec::from_raw_parts(
-                                                l5.cast(),
-                                                len7,
-                                                len7,
-                                            );
-                                            let l8 = *base
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l9 = *base
-                                                .add(3 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len10 = l9;
-                                            let bytes10 = _rt::Vec::from_raw_parts(
-                                                l8.cast(),
-                                                len10,
-                                                len10,
-                                            );
-                                            (_rt::string_lift(bytes7), _rt::string_lift(bytes10))
-                                        };
-                                        result11.push(e11);
-                                    }
-                                    _rt::cabi_dealloc(
-                                        base11,
-                                        len11 * (4 * ::core::mem::size_of::<*const u8>()),
-                                        ::core::mem::size_of::<*const u8>(),
-                                    );
-                                    result11
-                                };
-                                Ok(e)
-                            }
-                            1 => {
-                                let e = {
-                                    let l12 = *ptr0
-                                        .add(::core::mem::size_of::<*const u8>())
-                                        .cast::<*mut u8>();
-                                    let l13 = *ptr0
-                                        .add(2 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<usize>();
-                                    let len14 = l13;
-                                    let bytes14 = _rt::Vec::from_raw_parts(
-                                        l12.cast(),
-                                        len14,
-                                        len14,
-                                    );
-                                    _rt::string_lift(bytes14)
-                                };
-                                Err(e)
-                            }
-                            _ => _rt::invalid_enum_discriminant(),
-                        };
-                        result15
-                    }
-                }
-            }
-            impl Request {
-                #[allow(unused_unsafe, clippy::all)]
-                pub fn set_header(
-                    &self,
-                    key: &str,
-                    value: &str,
-                ) -> Result<(), _rt::String> {
-                    unsafe {
-                        #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
-                        #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
-                        struct RetArea(
-                            [::core::mem::MaybeUninit<
-                                u8,
-                            >; 3 * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let mut ret_area = RetArea(
-                            [::core::mem::MaybeUninit::uninit(); 3
-                                * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let vec0 = key;
-                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                        let len0 = vec0.len();
-                        let vec1 = value;
-                        let ptr1 = vec1.as_ptr().cast::<u8>();
-                        let len1 = vec1.len();
-                        let ptr2 = ret_area.0.as_mut_ptr().cast::<u8>();
-                        #[cfg(target_arch = "wasm32")]
-                        #[link(wasm_import_module = "wit:crossroads/types@0.1.0")]
-                        unsafe extern "C" {
-                            #[link_name = "[method]request.set-header"]
-                            fn wit_import3(
-                                _: i32,
-                                _: *mut u8,
-                                _: usize,
-                                _: *mut u8,
-                                _: usize,
-                                _: *mut u8,
-                            );
-                        }
-                        #[cfg(not(target_arch = "wasm32"))]
-                        unsafe extern "C" fn wit_import3(
-                            _: i32,
-                            _: *mut u8,
-                            _: usize,
-                            _: *mut u8,
-                            _: usize,
-                            _: *mut u8,
-                        ) {
-                            unreachable!()
-                        }
-                        unsafe {
-                            wit_import3(
-                                (self).handle() as i32,
-                                ptr0.cast_mut(),
-                                len0,
-                                ptr1.cast_mut(),
-                                len1,
-                                ptr2,
-                            )
-                        };
-                        let l4 = i32::from(*ptr2.add(0).cast::<u8>());
-                        let result8 = match l4 {
-                            0 => {
-                                let e = ();
-                                Ok(e)
-                            }
-                            1 => {
-                                let e = {
-                                    let l5 = *ptr2
-                                        .add(::core::mem::size_of::<*const u8>())
-                                        .cast::<*mut u8>();
-                                    let l6 = *ptr2
-                                        .add(2 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<usize>();
-                                    let len7 = l6;
-                                    let bytes7 = _rt::Vec::from_raw_parts(
-                                        l5.cast(),
-                                        len7,
-                                        len7,
-                                    );
-                                    _rt::string_lift(bytes7)
-                                };
-                                Err(e)
-                            }
-                            _ => _rt::invalid_enum_discriminant(),
-                        };
-                        result8
-                    }
-                }
-            }
-            impl Request {
-                #[allow(unused_unsafe, clippy::all)]
-                pub fn uri(&self) -> Result<_rt::String, _rt::String> {
-                    unsafe {
-                        #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
-                        #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
-                        struct RetArea(
-                            [::core::mem::MaybeUninit<
-                                u8,
-                            >; 3 * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let mut ret_area = RetArea(
-                            [::core::mem::MaybeUninit::uninit(); 3
-                                * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
-                        #[cfg(target_arch = "wasm32")]
-                        #[link(wasm_import_module = "wit:crossroads/types@0.1.0")]
-                        unsafe extern "C" {
-                            #[link_name = "[method]request.uri"]
-                            fn wit_import1(_: i32, _: *mut u8);
-                        }
-                        #[cfg(not(target_arch = "wasm32"))]
-                        unsafe extern "C" fn wit_import1(_: i32, _: *mut u8) {
-                            unreachable!()
-                        }
-                        unsafe { wit_import1((self).handle() as i32, ptr0) };
-                        let l2 = i32::from(*ptr0.add(0).cast::<u8>());
-                        let result9 = match l2 {
-                            0 => {
-                                let e = {
-                                    let l3 = *ptr0
-                                        .add(::core::mem::size_of::<*const u8>())
-                                        .cast::<*mut u8>();
-                                    let l4 = *ptr0
-                                        .add(2 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<usize>();
-                                    let len5 = l4;
-                                    let bytes5 = _rt::Vec::from_raw_parts(
-                                        l3.cast(),
-                                        len5,
-                                        len5,
-                                    );
-                                    _rt::string_lift(bytes5)
-                                };
-                                Ok(e)
-                            }
-                            1 => {
-                                let e = {
-                                    let l6 = *ptr0
-                                        .add(::core::mem::size_of::<*const u8>())
-                                        .cast::<*mut u8>();
-                                    let l7 = *ptr0
-                                        .add(2 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<usize>();
-                                    let len8 = l7;
-                                    let bytes8 = _rt::Vec::from_raw_parts(
-                                        l6.cast(),
-                                        len8,
-                                        len8,
-                                    );
-                                    _rt::string_lift(bytes8)
-                                };
-                                Err(e)
-                            }
-                            _ => _rt::invalid_enum_discriminant(),
-                        };
-                        result9
-                    }
-                }
-            }
-            impl Request {
-                #[allow(unused_unsafe, clippy::all)]
-                pub fn set_uri(&self, uri: &str) -> Result<(), _rt::String> {
-                    unsafe {
-                        #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
-                        #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
-                        struct RetArea(
-                            [::core::mem::MaybeUninit<
-                                u8,
-                            >; 3 * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let mut ret_area = RetArea(
-                            [::core::mem::MaybeUninit::uninit(); 3
-                                * ::core::mem::size_of::<*const u8>()],
-                        );
-                        let vec0 = uri;
-                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                        let len0 = vec0.len();
-                        let ptr1 = ret_area.0.as_mut_ptr().cast::<u8>();
-                        #[cfg(target_arch = "wasm32")]
-                        #[link(wasm_import_module = "wit:crossroads/types@0.1.0")]
-                        unsafe extern "C" {
-                            #[link_name = "[method]request.set-uri"]
-                            fn wit_import2(_: i32, _: *mut u8, _: usize, _: *mut u8);
-                        }
-                        #[cfg(not(target_arch = "wasm32"))]
-                        unsafe extern "C" fn wit_import2(
-                            _: i32,
-                            _: *mut u8,
-                            _: usize,
-                            _: *mut u8,
-                        ) {
-                            unreachable!()
-                        }
-                        unsafe {
-                            wit_import2(
-                                (self).handle() as i32,
-                                ptr0.cast_mut(),
-                                len0,
-                                ptr1,
-                            )
-                        };
-                        let l3 = i32::from(*ptr1.add(0).cast::<u8>());
-                        let result7 = match l3 {
-                            0 => {
-                                let e = ();
-                                Ok(e)
-                            }
-                            1 => {
-                                let e = {
-                                    let l4 = *ptr1
-                                        .add(::core::mem::size_of::<*const u8>())
-                                        .cast::<*mut u8>();
-                                    let l5 = *ptr1
-                                        .add(2 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<usize>();
-                                    let len6 = l5;
-                                    let bytes6 = _rt::Vec::from_raw_parts(
-                                        l4.cast(),
-                                        len6,
-                                        len6,
-                                    );
-                                    _rt::string_lift(bytes6)
-                                };
-                                Err(e)
-                            }
-                            _ => _rt::invalid_enum_discriminant(),
-                        };
-                        result7
                     }
                 }
             }
@@ -436,24 +302,16 @@ pub mod exports {
                 static __FORCE_SECTION_REF: fn() = super::super::super::super::__link_custom_section_describing_imports;
                 use super::super::super::super::_rt;
                 pub type Resolution = super::super::super::super::wit::crossroads::types::Resolution;
-                pub type Request = super::super::super::super::wit::crossroads::types::Request;
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_handle_cabi<T: Guest>(arg0: i32) -> *mut u8 {
+                pub unsafe fn _export_handle_cabi<T: Guest>() -> *mut u8 {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-                    let result0 = T::handle(unsafe {
-                        super::super::super::super::wit::crossroads::types::Request::from_handle(
-                            arg0 as u32,
-                        )
-                    });
+                    let result0 = T::handle();
                     let ptr1 = (&raw mut _RET_AREA.0).cast::<u8>();
                     use super::super::super::super::wit::crossroads::types::Resolution as V4;
                     match result0 {
-                        V4::Forward(e) => {
+                        V4::Forward => {
                             *ptr1.add(0).cast::<u8>() = (0i32) as u8;
-                            *ptr1
-                                .add(::core::mem::size_of::<*const u8>())
-                                .cast::<i32>() = (e).take_handle() as i32;
                         }
                         V4::Respond(e) => {
                             *ptr1.add(0).cast::<u8>() = (1i32) as u8;
@@ -520,16 +378,15 @@ pub mod exports {
                     }
                 }
                 pub trait Guest {
-                    fn handle(request: Request) -> Resolution;
+                    fn handle() -> Resolution;
                 }
                 #[doc(hidden)]
                 macro_rules! __export_wit_crossroads_proxy_0_1_0_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[unsafe (export_name =
                         "wit:crossroads/proxy@0.1.0#handle")] unsafe extern "C" fn
-                        export_handle(arg0 : i32,) -> * mut u8 { unsafe {
-                        $($path_to_types)*:: _export_handle_cabi::<$ty > (arg0) } }
-                        #[unsafe (export_name =
+                        export_handle() -> * mut u8 { unsafe { $($path_to_types)*::
+                        _export_handle_cabi::<$ty > () } } #[unsafe (export_name =
                         "cabi_post_wit:crossroads/proxy@0.1.0#handle")] unsafe extern "C"
                         fn _post_return_handle(arg0 : * mut u8,) { unsafe {
                         $($path_to_types)*:: __post_return_handle::<$ty > (arg0) } } };
@@ -555,80 +412,6 @@ pub mod exports {
 #[rustfmt::skip]
 mod _rt {
     #![allow(dead_code, clippy::all)]
-    use core::fmt;
-    use core::marker;
-    use core::sync::atomic::{AtomicU32, Ordering::Relaxed};
-    /// A type which represents a component model resource, either imported or
-    /// exported into this component.
-    ///
-    /// This is a low-level wrapper which handles the lifetime of the resource
-    /// (namely this has a destructor). The `T` provided defines the component model
-    /// intrinsics that this wrapper uses.
-    ///
-    /// One of the chief purposes of this type is to provide `Deref` implementations
-    /// to access the underlying data when it is owned.
-    ///
-    /// This type is primarily used in generated code for exported and imported
-    /// resources.
-    #[repr(transparent)]
-    pub struct Resource<T: WasmResource> {
-        handle: AtomicU32,
-        _marker: marker::PhantomData<T>,
-    }
-    /// A trait which all wasm resources implement, namely providing the ability to
-    /// drop a resource.
-    ///
-    /// This generally is implemented by generated code, not user-facing code.
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe trait WasmResource {
-        /// Invokes the `[resource-drop]...` intrinsic.
-        unsafe fn drop(handle: u32);
-    }
-    impl<T: WasmResource> Resource<T> {
-        #[doc(hidden)]
-        pub unsafe fn from_handle(handle: u32) -> Self {
-            debug_assert!(handle != u32::MAX);
-            Self {
-                handle: AtomicU32::new(handle),
-                _marker: marker::PhantomData,
-            }
-        }
-        /// Takes ownership of the handle owned by `resource`.
-        ///
-        /// Note that this ideally would be `into_handle` taking `Resource<T>` by
-        /// ownership. The code generator does not enable that in all situations,
-        /// unfortunately, so this is provided instead.
-        ///
-        /// Also note that `take_handle` is in theory only ever called on values
-        /// owned by a generated function. For example a generated function might
-        /// take `Resource<T>` as an argument but then call `take_handle` on a
-        /// reference to that argument. In that sense the dynamic nature of
-        /// `take_handle` should only be exposed internally to generated code, not
-        /// to user code.
-        #[doc(hidden)]
-        pub fn take_handle(resource: &Resource<T>) -> u32 {
-            resource.handle.swap(u32::MAX, Relaxed)
-        }
-        #[doc(hidden)]
-        pub fn handle(resource: &Resource<T>) -> u32 {
-            resource.handle.load(Relaxed)
-        }
-    }
-    impl<T: WasmResource> fmt::Debug for Resource<T> {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            f.debug_struct("Resource").field("handle", &self.handle).finish()
-        }
-    }
-    impl<T: WasmResource> Drop for Resource<T> {
-        fn drop(&mut self) {
-            unsafe {
-                match self.handle.load(Relaxed) {
-                    u32::MAX => {}
-                    other => T::drop(other),
-                }
-            }
-        }
-    }
     pub use alloc_crate::vec::Vec;
     pub use alloc_crate::string::String;
     pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
@@ -754,20 +537,17 @@ pub(crate) use __export_crossroads_impl as export;
 )]
 #[doc(hidden)]
 #[allow(clippy::octal_escapes)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 663] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x96\x04\x01A\x02\x01\
-A\x07\x01B\x16\x04\0\x07request\x03\x01\x01p}\x01k\x01\x01r\x02\x0bstatus-code{\x04\
-body\x02\x04\0\x08response\x03\0\x03\x01i\0\x01q\x02\x07forward\x01\x05\0\x07res\
-pond\x01\x04\0\x04\0\x0aresolution\x03\0\x06\x01h\0\x01o\x02ss\x01p\x09\x01j\x01\
-\x0a\x01s\x01@\x01\x04self\x08\0\x0b\x04\0\x17[method]request.headers\x01\x0c\x01\
-j\0\x01s\x01@\x03\x04self\x08\x03keys\x05values\0\x0d\x04\0\x1a[method]request.s\
-et-header\x01\x0e\x01j\x01s\x01s\x01@\x01\x04self\x08\0\x0f\x04\0\x13[method]req\
-uest.uri\x01\x10\x01@\x02\x04self\x08\x03uris\0\x0d\x04\0\x17[method]request.set\
--uri\x01\x11\x03\0\x1awit:crossroads/types@0.1.0\x05\0\x02\x03\0\0\x0aresolution\
-\x02\x03\0\0\x07request\x02\x03\0\0\x08response\x01B\x09\x02\x03\x02\x01\x01\x04\
-\0\x0aresolution\x03\0\0\x02\x03\x02\x01\x02\x04\0\x07request\x03\0\x02\x02\x03\x02\
-\x01\x03\x04\0\x08response\x03\0\x04\x01i\x03\x01@\x01\x07request\x06\0\x01\x04\0\
-\x06handle\x01\x07\x04\0\x1awit:crossroads/proxy@0.1.0\x05\x04\x04\0\x1fwit:cros\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 538] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x99\x03\x01A\x02\x01\
+A\x08\x01B\x0b\x01o\x02ss\x01p\0\x01@\0\0\x01\x04\0\x07headers\x01\x02\x01j\0\x01\
+s\x01@\x02\x03keys\x05values\0\x03\x04\0\x0aset-header\x01\x04\x01@\0\0s\x04\0\x03\
+uri\x01\x05\x01@\x01\x03uris\0\x03\x04\0\x07set-uri\x01\x06\x03\0\x1cwit:crossro\
+ads/request@0.1.0\x05\0\x01B\x06\x01p}\x01k\0\x01r\x02\x0bstatus-code{\x04body\x01\
+\x04\0\x08response\x03\0\x02\x01q\x02\x07forward\0\0\x07respond\x01\x03\0\x04\0\x0a\
+resolution\x03\0\x04\x03\0\x1awit:crossroads/types@0.1.0\x05\x01\x02\x03\0\x01\x0a\
+resolution\x02\x03\0\x01\x08response\x01B\x06\x02\x03\x02\x01\x02\x04\0\x0aresol\
+ution\x03\0\0\x02\x03\x02\x01\x03\x04\0\x08response\x03\0\x02\x01@\0\0\x01\x04\0\
+\x06handle\x01\x04\x04\0\x1awit:crossroads/proxy@0.1.0\x05\x04\x04\0\x1fwit:cros\
 sroads/crossroads@0.1.0\x04\0\x0b\x10\x01\0\x0acrossroads\x03\0\0\0G\x09producer\
 s\x01\x0cprocessed-by\x02\x0dwit-component\x070.227.1\x10wit-bindgen-rust\x060.4\
 1.0";
