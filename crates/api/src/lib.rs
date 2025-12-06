@@ -29,13 +29,13 @@ impl API {
 
     pub async fn run(self, runtime: Runtime) -> Result<()> {
         let app = Router::new()
-            .route("/proxys/current", get(endpoints::current_proxy))
-            .route("/proxys/current/{tag}", get(endpoints::set_current_proxy))
-            .route("/proxys", get(endpoints::all_proxies))
-            .route("/proxys/{tag}", post(endpoints::create_proxy))
-            .route("/proxys/{tag}", get(endpoints::get_proxy))
-            .route("/proxys/{tag}", put(endpoints::update_proxy))
-            .route("/proxys/{tag}", delete(endpoints::delete_proxy))
+            .route("/proxies/current", get(endpoints::current_proxy))
+            .route("/proxies/current/{tag}", put(endpoints::set_current_proxy))
+            .route("/proxies", get(endpoints::all_proxies))
+            .route("/proxies/{tag}", post(endpoints::create_proxy))
+            .route("/proxies/{tag}", get(endpoints::get_proxy))
+            .route("/proxies/{tag}", put(endpoints::update_proxy))
+            .route("/proxies/{tag}", delete(endpoints::delete_proxy))
             .with_state((Arc::new(RwLock::new(self.database)), runtime));
         let address = format!("0.0.0.0:{}", self.port);
         let listener = tokio::net::TcpListener::bind(address).await?;
