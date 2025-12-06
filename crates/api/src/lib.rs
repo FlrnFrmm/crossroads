@@ -30,7 +30,7 @@ impl API {
     pub async fn run(self, runtime: Runtime) -> Result<()> {
         let app = Router::new()
             .route("/proxies/current", get(endpoints::current_proxy))
-            .route("/proxies/current/{tag}", get(endpoints::set_current_proxy))
+            .route("/proxies/current/{tag}", put(endpoints::set_current_proxy))
             .route("/proxies", get(endpoints::all_proxies))
             .route("/proxies/{tag}", post(endpoints::create_proxy))
             .route("/proxies/{tag}", get(endpoints::get_proxy))
