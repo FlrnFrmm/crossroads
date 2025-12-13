@@ -8,7 +8,7 @@ bindgen!({
 });
 
 pub(crate) fn add_to_linker(linker: &mut Linker<Context>) -> Result<(), anyhow::Error> {
-    let _ = wit::crossroads::types::add_to_linker::<_, HasSelf<_>>(linker, |state| state);
+    wit::crossroads::types::add_to_linker::<_, HasSelf<_>>(linker, |state| state)?;
     wit::crossroads::request::add_to_linker::<_, HasSelf<_>>(linker, |state| state)
 }
 
