@@ -29,7 +29,6 @@ impl Runtime {
         wasmtime_wasi::p2::add_to_linker_sync(&mut linker)?;
         bindings::add_to_linker(&mut linker)?;
         let component = Component::from_binary(&engine, default_proxy)?;
-
         let runtime = Self {
             engine,
             linker,
@@ -76,7 +75,9 @@ fn extract_proxy_function(
     store: &mut Store<context::Context>,
     component: &Component,
 ) -> Result<ProxyFunc> {
-    let instance = linker.instantiate(&mut *store, component)?;
+    let instance = linker
+        .instantiate(&mut *store, component)
+        .map_err(|e| anyhow!("Failed to instantiate component: {}", e))?;
 
     let interface_namespace = "wit:crossroads/proxy@0.1.0";
     let interface_idx = instance
