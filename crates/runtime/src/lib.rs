@@ -26,7 +26,6 @@ impl Runtime {
     pub fn new(default_proxy: &[u8]) -> Result<Self> {
         let engine = wasmtime::Engine::default();
         let mut linker = Linker::new(&engine);
-
         wasmtime_wasi::p2::add_to_linker_sync(&mut linker)?;
         bindings::add_to_linker(&mut linker)?;
         let component = Component::from_binary(&engine, default_proxy)?;
